@@ -1,5 +1,5 @@
 Config = {}
-Config.UseTruckerJob = false -- true = The shops stock is based on when truckers refill it | false = shop inventory never runs out
+Config.UseTruckerJob = true -- true = The shops stock is based on when truckers refill it | false = shop inventory never runs out
 Config.UseTarget = GetConvar('UseTarget', 'false') == 'true' -- Use qb-target interactions (don't change this, go to your server.cfg and add `setr UseTarget true` to use this and just that from true to false or the other way around)
 Config.FirearmsLicenseCheck = false -- Whether a arms dealer checks for a firearms license
 Config.ShopsInvJsonFile = './json/shops-inventory.json' -- json file location
@@ -432,6 +432,53 @@ Config.Products = {
             slot = 1,
         }
     },
+	-- Off Duty Shops --
+	["burgershot"] = {
+	[1] = {
+			name = "heartstopper",
+			price = 500,
+			amount = 10, -- if using stash, this amount will be updated by stash amount
+			info = {},
+			type = "item",
+			slot = 1,
+		},
+	[2] = {
+			name = "bscoke",
+			price = 500,
+			amount = 10,
+			info = {},
+			type = "item",
+			slot = 2,
+		},
+	},
+	["uwucafe"] = {
+	[1] = {
+			name = "tosti",
+			price = 500,
+			amount = 25,
+			info = {},
+			type = "item",
+			slot = 1,
+		},
+	[2] = {
+			name = "kurkakola",
+			price = 500,
+			amount = 25,
+			info = {},
+			type = "item",
+			slot = 2,
+		},
+	},
+	["hayes"] = {
+	[1] = {
+			name = "repairkit",
+			price = 2000,
+			amount = 10,
+			info = {},
+			type = "item",
+			slot = 1,
+		},
+	},
 }
 Config.Locations = {
     -- 24/7 Locations
@@ -1051,4 +1098,130 @@ Config.Locations = {
         ["blipcolor"] = 0,
         ["delivery"] = vector4(-1507.64, 1505.52, 115.29, 262.2)
     },
+	
+	-- Off Duty Shops
+	["burgershot"] = {
+		["label"] = "Burger Shot",
+		["type"] = "offduty",
+		["job"] = "burgershot",
+		["coords"] = vector4(-1194.11, -895.61, 12.97, 317.3),
+		["usestash"] = false,
+		["stash"] = "", -- fill in stash name if using stash
+		["vendortype"] = "ped",
+		["prop"] = '',
+		["ped"] = 'u_m_y_burgerdrug_01',
+		["pedvariation"] = {
+			[0] = {0, 0, 0},
+			[1] = {0, 0, 0},
+			[2] = {0, 0, 0},
+			[3] = {0, 0, 0},
+			[4] = {0, 0, 0},
+			[5] = {0, 0, 0},
+			[6] = {0, 0, 0},
+			[7] = {0, 0, 0},
+			[8] = {0, 0, 0},
+			[9] = {0, 0, 0},
+			[10] = {0, 0, 0},
+			[11] = {0, 0, 0},
+		},
+		["pedprop"] = {
+			[0] = {0, 0, true},
+			[1] = {0, 0, true},
+			[2] = {0, 0, true},
+			[6] = {0, 0, true},
+			[7] = {0, 0, true},
+		},
+		["scenario"] = "WORLD_HUMAN_STAND_IMPATIENT",
+		["radius"] = 1.5,
+		["targetIcon"] = "fa-solid fa-cart-shopping",
+		["targetLabel"] = "What do you have?",
+		["products"] = Config.Products["burgershot"],
+		["showblip"] = false,
+		["blipsprite"] = 52,
+		["blipscale"] = 0.8,
+		["blipcolor"] = 0
+	},
+	["uwucafe"] = {
+		["label"] = "Uwu Cafe",
+		["type"] = "offduty",
+		["job"] = "uwucafe",
+		["coords"] = vector4(-575.97, -1072.57, 21.33, 146.35),
+		["usestash"] = false,
+		["stash"] = "",
+		["vendortype"] = "ped",
+		["prop"] = '',
+		["ped"] = 'a_f_m_bevhills_02',
+		["pedvariation"] = {
+			[0] = {0, 0, 0},
+			[1] = {0, 0, 0},
+			[2] = {1, 0, 0},
+			[3] = {0, 0, 0},
+			[4] = {0, 0, 0},
+			[5] = {0, 0, 0},
+			[6] = {0, 0, 0},
+			[7] = {0, 0, 0},
+			[8] = {0, 0, 0},
+			[9] = {0, 0, 0},
+			[10] = {0, 0, 0},
+			[11] = {0, 0, 0},
+		},
+		["pedprop"] = {
+			[0] = {0, 0, true},
+			[1] = {0, 1, true},
+			[2] = {0, 0, true},
+			[6] = {0, 0, true},
+			[7] = {0, 0, true},
+		},
+		["scenario"] = "WORLD_HUMAN_DRINKING",
+		["radius"] = 1.5,
+		["targetIcon"] = "fa-solid fa-cart-shopping",
+		["targetLabel"] = "What do you have?",
+		["products"] = Config.Products["uwucafe"],
+		["showblip"] = false,
+		["blipsprite"] = 52,
+		["blipscale"] = 0.8,
+		["blipcolor"] = 0
+	},
+	["hayes"] = {
+		["label"] = "Hayes",
+		["type"] = "offduty",
+		["job"] = "hayes",
+		["coords"] = vector4(-1418.1899, -438.0151, 36.0616, 211.0), -- prop
+		--["coords"] = vector4(-1418.25, -437.82, 35.06, 25.4), -- ped
+		["usestash"] = false,
+		["stash"] = "",
+		["vendortype"] = "prop",
+		["prop"] = 'prop_vend_fags_01',
+		["ped"] = 'a_m_m_hillbilly_01',
+		["pedvariation"] = {
+			[0] = {0, 0, 0},
+			[1] = {0, 0, 0},
+			[2] = {1, 0, 0},
+			[3] = {0, 0, 0},
+			[4] = {0, 0, 0},
+			[5] = {0, 0, 0},
+			[6] = {0, 0, 0},
+			[7] = {0, 0, 0},
+			[8] = {0, 0, 0},
+			[9] = {0, 0, 0},
+			[10] = {0, 0, 0},
+			[11] = {0, 0, 0},
+		},
+		["pedprop"] = {
+			--[0] = {0, 0, true},
+			[1] = {0, 0, true},
+			[2] = {0, 0, true},
+			[6] = {0, 0, true},
+			[7] = {0, 0, true},
+		},
+		["scenario"] = "WORLD_HUMAN_STAND_IMPATIENT",
+		["radius"] = 1.5,
+		["targetIcon"] = "fa-solid fa-cart-shopping",
+		["targetLabel"] = "What do you have?",
+		["products"] = Config.Products["hayes"],
+		["showblip"] = false,
+		["blipsprite"] = 52,
+		["blipscale"] = 0.8,
+		["blipcolor"] = 0
+	},
 }
