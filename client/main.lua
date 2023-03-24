@@ -124,35 +124,36 @@ local function createPeds()
 
     for k, v in pairs(Config.Locations) do
         local current = type(v["ped"]) == "number" and v["ped"] or joaat(v["ped"])
+		if v.type == nil or not v.type == "offduty" then  -- gg edit Off Duty Shops
+			RequestModel(current)
+			while not HasModelLoaded(current) do
+				Wait(0)
+			end
 
-        RequestModel(current)
-        while not HasModelLoaded(current) do
-            Wait(0)
-        end
+			ShopPed[k] = CreatePed(0, current, v["coords"].x, v["coords"].y, v["coords"].z-1, v["coords"].w, false, false)
+			TaskStartScenarioInPlace(ShopPed[k], v["scenario"], 0, true)
+			FreezeEntityPosition(ShopPed[k], true)
+			SetEntityInvincible(ShopPed[k], true)
+			SetBlockingOfNonTemporaryEvents(ShopPed[k], true)
 
-        ShopPed[k] = CreatePed(0, current, v["coords"].x, v["coords"].y, v["coords"].z-1, v["coords"].w, false, false)
-        TaskStartScenarioInPlace(ShopPed[k], v["scenario"], 0, true)
-        FreezeEntityPosition(ShopPed[k], true)
-        SetEntityInvincible(ShopPed[k], true)
-        SetBlockingOfNonTemporaryEvents(ShopPed[k], true)
-
-        if Config.UseTarget then
-            exports['qb-target']:AddTargetEntity(ShopPed[k], {
-                options = {
-                    {
-                        label = v["targetLabel"],
-                        icon = v["targetIcon"],
-                        item = v["item"],
-                        action = function()
-                            openShop(k, Config.Locations[k])
-                        end,
-                        job = v.requiredJob,
-                        gang = v.requiredGang
-                    }
-                },
-                distance = 2.0
-            })
-        end
+			if Config.UseTarget then
+				exports['qb-target']:AddTargetEntity(ShopPed[k], {
+					options = {
+						{
+							label = v["targetLabel"],
+							icon = v["targetIcon"],
+							item = v["item"],
+							action = function()
+								openShop(k, Config.Locations[k])
+							end,
+							job = v.requiredJob,
+							gang = v.requiredGang
+						}
+					},
+					distance = 2.0
+				})
+			end
+		end -- gg edit
     end
 
     local current = type(Config.SellCasinoChips.ped) == 'number' and Config.SellCasinoChips.ped or joaat(Config.SellCasinoChips.ped)
@@ -290,4 +291,97 @@ CreateThread(function()
             end
         end
     end
+end)
+
+-- Off Duty Shops --
+
+local DutyCount = {}
+
+-- Events
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+	TriggerServerEvent('qb-shops:server:UpdateDutyCount')
+end)
+
+RegisterNetEvent('qb-shops:client:UpdateDutyCount', function(dutycount)
+	DutyCount = dutycount
+end)
+
+-- Threads
+
+CreateThread(function()
+	local VendorSpawned = {}
+	for k, v in pairs(Config.Locations) do
+		if v.type == "offduty" then
+			VendorSpawned[k] = false
+		end
+		if DutyCount[k] == nil then DutyCount[k] = 0 end
+	end
+	while true do
+		local PlayerPed = PlayerPedId()
+		local PlayerPos = GetEntityCoords(PlayerPed)
+		for k, v in pairs(Config.Locations) do
+			if v.type == "offduty" then
+				local Position = vector3(v["coords"].x, v["coords"].y, v["coords"].z)
+				local dist = #(PlayerPos - Position)
+				if dist < 35.0 and DutyCount[k] < 1 then
+					if not VendorSpawned[k] then
+						if v.vendortype == "ped" then
+							local hash = GetHashKey(v.ped)
+							RequestModel(hash)
+							while not HasModelLoaded(hash) do Wait(5) end
+							ShopPed[k] = CreatePed(28, hash, v["coords"].x, v["coords"].y, v["coords"].z, v["coords"].w, false, true)
+							for comp, var in pairs(v.pedvariation) do
+								SetPedComponentVariation(ShopPed[k], comp, var[1], var[2], var[3])
+							end
+							for prop, var in pairs(v.pedprop) do
+								SetPedPropIndex(ShopPed[k], prop, var[1], var[2], var[3])
+							end
+							TaskStartScenarioInPlace(ShopPed[k], v["scenario"], 0, true)
+							FreezeEntityPosition(ShopPed[k], true)
+							SetEntityInvincible(ShopPed[k], true)
+							SetBlockingOfNonTemporaryEvents(ShopPed[k], true)
+						elseif v.vendortype == "prop" then
+							local hash = GetHashKey(v.prop)
+							RequestModel(hash)
+							while not HasModelLoaded(hash) do Wait(5) end
+							ShopPed[k] = CreateObject(hash, v["coords"].x, v["coords"].y, v["coords"].z, false, true, false) -- check if mission is needed
+							SetEntityHeading(ShopPed[k], v["coords"].w)
+							FreezeEntityPosition(ShopPed[k], true)
+						else
+						end
+						if v.usestash then
+							TriggerServerEvent("qb-shops:server:GetCurrentStock")
+						end
+					end
+					VendorSpawned[k] = true
+					exports['qb-target']:AddEntityZone("Vendor-"..k, ShopPed[k], {
+						name = k,
+						heading = v["coords"].w,
+						debugPoly = false,
+					}, {
+						options = {
+							{
+								type = "client",
+								icon = "fas fa-store",
+								label = "What do you have?",
+								shop = k,
+								action = function()
+									openShop(k, Config.Locations[k])
+								end,
+							},
+						},
+						distance = 2.5
+					})
+				else
+					if VendorSpawned[k] then
+						DeletePed(ShopPed[k])
+						DeleteEntity(ShopPed[k])
+						VendorSpawned[k] = false
+					end
+				end
+			end
+		end
+		Wait(3000)
+	end
 end)
